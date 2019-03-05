@@ -1,4 +1,5 @@
 extern crate csv;
+extern crate indicatif;
 
 mod fxn;
 
@@ -7,6 +8,7 @@ mod tests {
     use std::error::Error;
     use super::fxn;
     use std::fs::File;
+    use indicatif::{ProgressBar,ProgressStyle};
 
     fn load_tests(fxn_name: String)  -> Result< Vec<(usize, usize, String)>, Box<Error> > {
         let test_tsv = File::open(format!("./tests/{}.tsv", fxn_name))?;
@@ -26,12 +28,22 @@ mod tests {
     fn parity() {
         let name = "parity".into();
         let rows = load_tests(name).unwrap();
+        let length = rows.len();
+        //let mut counter = 1;
         let mut iter_row = rows.into_iter();
+        let bar = ProgressBar::new(length as u64);
+        bar.set_style(ProgressStyle::default_bar()
+            .template("[{spinner}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
+            .progress_chars("##-"));
         loop {
-            let r = iter_row.next().unwrap();
-            let output = fxn::parity(r.0);
-            assert_eq!(output, r.1);
-            break;
+            match iter_row.next() {
+                Some(r) => {
+                    let output = fxn::parity(r.0);
+                    assert_eq!(output, r.1);
+                    bar.inc(1);
+                },
+                None => {break},
+            }
         }
     }
 
