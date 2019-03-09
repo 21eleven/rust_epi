@@ -52,19 +52,39 @@ mod tests {
         Ok(n_lines)
     }
 
-    #[parity_lookup]
+    #[test]
     fn parity_lookup() {
-        
+        let name = "parity".into();
+        let mut rdr = load_records(&name).expect("csv file");
+        let rows = rdr.records();
+        let length = count_tests(&name).expect("an int");
+        let bar = ProgressBar::new(length as u64);
+        bar.set_style(ProgressStyle::default_bar()
+            .template("[{spinner}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
+            .progress_chars("##-"));
+        for row in rows {
+            let rec = row.expect("another record");
+            let input = rec.get(0).unwrap().parse::<u64>().unwrap();
+            let output = rec.get(1).unwrap().parse::<u8>().unwrap();
+            let msg =rec.get(2).unwrap().parse::<String>().unwrap();
+
+            let result = fxn::parity_lookup(input);
+            if result == output {
+                bar.inc(1);
+            } else {
+                bar.finish_with_message(&format!("err: {}",msg) as &str);
+            }
+        }
+        bar.finish_with_message("tests passed!");
+
     }
 
     #[test]
     fn swap_bits() {
         let name = "swap_bits".into();
         let mut rdr = load_records(&name).expect("csv file");
-        dbg!("loaded");
         let rows = rdr.records();
         let length = count_tests(&name).expect("an int");
-        dbg!(length);
         let bar = ProgressBar::new(length as u64);
         bar.set_style(ProgressStyle::default_bar()
             .template("[{spinner}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
