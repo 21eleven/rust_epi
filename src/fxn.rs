@@ -1,15 +1,9 @@
 #![allow(dead_code)]
 use std::collections::HashMap;
 
-fn build_16bit_parity_lookup() -> std::collections::HashMap<usize, u8> {
-    let mut parity_16_bit_words = HashMap::new();
-    for i in 0..=0xFFFF {
-        let p = parity(i);
-        parity_16_bit_words.insert(i, p);
-    }
-    parity_16_bit_words
-
-} 
+fn build_16bit_parity_lookup() -> Vec<u8> {
+    (0..=0xFFFF).map(|i| parity(i)).collect()
+}
 
 pub fn parity(n: usize) -> u8 {
     /*
@@ -48,9 +42,9 @@ pub fn parity_lookup(n: u64) -> u8 {
     */
     let lookup = build_16bit_parity_lookup();
     let bitmask = 0xFFFF;
-    let p1 = lookup.get(&(n & bitmask)).expect("parity");
-    let p2 = lookup.get(&((n >> 16) & bitmask)).expect("parity");
-    let p3 = lookup.get(&((n >> 32) & bitmask)).expect("parity");
-    let p4 = lookup.get(&((n >> 48) & bitmask)).expect("parity");
+    let p1 = lookup[(n & bitmask) as usize];
+    let p2 = lookup[((n >> 16) & bitmask) as usize];
+    let p3 = lookup[((n >> 32) & bitmask) as usize];
+    let p4 = lookup[((n >> 48) & bitmask) as usize];
     (p1 ^ p2 ^ p3 ^ p4)
 }
