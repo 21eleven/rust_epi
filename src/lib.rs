@@ -1,5 +1,5 @@
-extern crate csv;
-extern crate indicatif;
+//extern crate csv;
+//extern crate indicatif;
 
 mod fxn;
 
@@ -51,6 +51,12 @@ mod tests {
         let n_lines = byte_vec.into_iter().filter(|x| x == &b'\n').count();
         Ok(n_lines)
     }
+
+    #[parity_lookup]
+    fn parity_lookup() {
+        
+    }
+
     #[test]
     fn swap_bits() {
         let name = "swap_bits".into();
