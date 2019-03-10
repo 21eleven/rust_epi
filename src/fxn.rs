@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 use std::collections::HashMap;
 
-fn build_16bit_parity_lookup() -> Vec<u8> {
+pub fn build_16bit_parity_lookup() -> Vec<u8> {
     (0..=0xFFFF).map(|i| parity(i)).collect()
 }
 
@@ -34,13 +34,12 @@ pub fn swap_bits(n: usize, idx1: u8, idx2: u8 ) -> usize {
     swapped
 }
 
-pub fn parity_lookup(n: u64) -> u8 {
+pub fn parity_lookup(n: u64, lookup: &Vec<u8>) -> u8 {
     /*
     used a cached lookup of table containing
     the parity of all 16bit strings to find the
     parity of a 64bit word efficiently
     */
-    let lookup = build_16bit_parity_lookup();
     let bitmask = 0xFFFF;
     let p1 = lookup[(n & bitmask) as usize];
     let p2 = lookup[((n >> 16) & bitmask) as usize];
