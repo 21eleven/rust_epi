@@ -10,6 +10,8 @@ mod tests {
     use std::fs::File;
     use std::fs;
     use indicatif::{ProgressBar,ProgressStyle};
+    //use std::time::Instant;
+    use std::time::SystemTime;
 
     fn load_tests(fxn_name: String)  -> Result< Vec<(usize, usize, String)>, Box<Error> > {
         let test_tsv = File::open(format!("./tests/{}.tsv", fxn_name))?;
@@ -24,19 +26,6 @@ mod tests {
         }
         Ok(rows)
     }
-    /*fn load_tests2(fxn_name: String)  -> Result< Vec<T>, Box<Error> > {
-        let test_tsv = File::open(format!("./tests/{}.tsv", fxn_name))?;
-        let mut reader = csv::ReaderBuilder::new().delimiter(b'\t').has_headers(false).from_reader(test_tsv);
-        let mut rows = Vec::new();
-        for row in reader.records() {
-            let record = row?;
-            let input = record.get(0).unwrap().parse::<usize>().unwrap();
-            let output = record.get(1).unwrap().parse::<usize>().unwrap();
-            let msg = record.get(2).unwrap().parse::<String>().unwrap();
-            rows.push((input, output, msg));
-        }
-        Ok(rows)
-    }*/
     
     fn load_records(fxn_name: &String) -> Result<csv::Reader<std::fs::File>, Box<Error>> {
         dbg!("in load fxn");
@@ -59,6 +48,7 @@ mod tests {
         let rows = rdr.records();
         let length = count_tests(&name).expect("an int");
         let bar = ProgressBar::new(length as u64);
+        let lookup = fxn::build_16bit_parity_lookup();
         bar.set_style(ProgressStyle::default_bar()
             .template("[{spinner}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
             .progress_chars("##-"));
@@ -68,7 +58,13 @@ mod tests {
             let output = rec.get(1).unwrap().parse::<u8>().unwrap();
             let msg =rec.get(2).unwrap().parse::<String>().unwrap();
 
-            let result = fxn::parity_lookup(input);
+            let start = SystemTime::now();
+            let result = fxn::parity_lookup(input, &lookup);
+            let end = SystemTime::now();
+            let runtime = end.duration_since(start).expect("a duraction");
+            let s_run = runtime.as_nanos();
+            let str_msg = format!("ns: {}", s_run);
+
             if result == output {
                 bar.inc(1);
             } else {
