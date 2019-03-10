@@ -1,6 +1,3 @@
-//extern crate csv;
-//extern crate indicatif;
-
 mod fxn;
 
 #[cfg(test)]
@@ -109,7 +106,6 @@ mod tests {
         let name = "parity".into();
         let rows = load_tests(name).unwrap();
         let length = rows.len();
-        //let mut counter = 1;
         let mut iter_row = rows.into_iter();
         let bar = ProgressBar::new(length as u64);
         bar.set_style(ProgressStyle::default_bar()
