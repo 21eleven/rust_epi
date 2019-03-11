@@ -53,21 +53,21 @@ mod tests {
             let rec = row.expect("another record");
             let input = rec.get(0).unwrap().parse::<u64>().unwrap();
             let output = rec.get(1).unwrap().parse::<u64>().unwrap();
-            let msg =rec.get(2).unwrap().parse::<String>().unwrap();
+            let _msg =rec.get(2).unwrap().parse::<String>().unwrap();
 
             let start = SystemTime::now();
             let result = fxn::reverse_bits(input, &lookup);
             let end = SystemTime::now();
             let runtime = end.duration_since(start).expect("a duraction");
             let s_run = runtime.as_nanos();
-            let str_msg = stringify!(s_run);
+            let str_msg = &(format!("ns: {}", s_run ))[..];
             bar.set_message(&str_msg);
 
             if result == output {
                 bar.inc(1);
             } else {
-                bar.finish_with_message(&format!("err: {} -> {}, should be {}", input, result, output) as &str);
-                assert_eq!(result, output);
+                bar.set_message(&format!("err: {} -> {}, should be {}", input, result, output) as &str);
+                assert_eq!(result,output)
             }
         }
         bar.finish_with_message("tests passed!");
@@ -102,6 +102,7 @@ mod tests {
                 bar.inc(1);
             } else {
                 bar.finish_with_message(&format!("err: {}",msg) as &str);
+                assert_eq!(result, output);
             }
         }
         bar.finish_with_message("tests passed!");

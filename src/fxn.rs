@@ -1,5 +1,4 @@
 #![allow(dead_code)]
-use std::collections::HashMap;
 
 pub fn build_16bit_parity_lookup() -> Vec<u8> {
     (0..=0xFFFF).map(|i| parity(i)).collect()
