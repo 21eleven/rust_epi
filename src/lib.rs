@@ -39,6 +39,41 @@ mod tests {
     }
 
     #[test]
+    fn reverse_bits() {
+        let name = "reverse_bits".into();
+        let mut rdr = load_records(&name).expect("csv file");
+        let rows = rdr.records();
+        let length = count_tests(&name).expect("an int");
+        let bar = ProgressBar::new(length as u64);
+        let lookup = fxn::build_16bit_reverse_lookup();
+        bar.set_style(ProgressStyle::default_bar()
+            .template("[{spinner}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
+            .progress_chars("##-"));
+        for row in rows {
+            let rec = row.expect("another record");
+            let input = rec.get(0).unwrap().parse::<u64>().unwrap();
+            let output = rec.get(1).unwrap().parse::<u64>().unwrap();
+            let msg =rec.get(2).unwrap().parse::<String>().unwrap();
+
+            let start = SystemTime::now();
+            let result = fxn::reverse_bits(input, &lookup);
+            let end = SystemTime::now();
+            let runtime = end.duration_since(start).expect("a duraction");
+            let s_run = runtime.as_nanos();
+            let str_msg = stringify!(s_run);
+            bar.set_message(&str_msg);
+
+            if result == output {
+                bar.inc(1);
+            } else {
+                bar.finish_with_message(&format!("err: {} -> {}, should be {}", input, result, output) as &str);
+                assert_eq!(result, output);
+            }
+        }
+        bar.finish_with_message("tests passed!");
+    }
+
+    #[test]
     fn parity_lookup() {
         let name = "parity".into();
         let mut rdr = load_records(&name).expect("csv file");
@@ -60,7 +95,8 @@ mod tests {
             let end = SystemTime::now();
             let runtime = end.duration_since(start).expect("a duraction");
             let s_run = runtime.as_nanos();
-            let str_msg = format!("ns: {}", s_run);
+            let str_msg = &(format!("ns: {}", s_run ))[..];
+            bar.set_message(&str_msg);
 
             if result == output {
                 bar.inc(1);

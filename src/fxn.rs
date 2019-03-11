@@ -47,3 +47,28 @@ pub fn parity_lookup(n: u64, lookup: &Vec<u8>) -> u8 {
     let p4 = lookup[((n >> 48) & bitmask) as usize];
     (p1 ^ p2 ^ p3 ^ p4)
 }
+
+pub fn reverse_bits(n: u64, lookup: &Vec<u16>) -> u64 {
+    let bitmask = 0xFFFF;
+    let p1 = lookup[(n & bitmask) as usize];
+    let p2 = lookup[(n >> 16 & bitmask) as usize];
+    let p3 = lookup[(n >> 32 & bitmask) as usize];
+    let p4 = lookup[(n >> 48 & bitmask) as usize];
+    ((p1 as u64) << 48) ^ ((p2 as u64) << 32) ^ ((p3 as u64) << 16) ^ (p4 as u64) 
+
+}
+
+pub fn build_16bit_reverse_lookup() -> Vec<u16> {
+    (0..=0xFFFF).map(|i| reverse(i)).collect()
+}
+
+pub fn reverse(x: u16) -> u16 {
+    let mut n = x;
+    for i in 0..8 {
+        if (n >> (15 - 0) & 1) != ( (n >> i) & 1) {
+            n = n ^ (1 << (15 - i));
+            n = n ^ (1 << i);
+        } 
+    }
+    n
+}
