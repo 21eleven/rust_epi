@@ -62,7 +62,6 @@ mod tests {
     }
     
     fn load_records(fxn_name: &String) -> Result<csv::Reader<std::fs::File>, Box<Error>> {
-        dbg!("in load fxn");
         let tsv = File::open(format!("./tests/{}.tsv", &fxn_name))?;
         let reader = csv::ReaderBuilder::new().delimiter(b'\t').flexible(true).has_headers(true).from_reader(tsv);
         Ok(reader)
@@ -74,15 +73,12 @@ mod tests {
         let n_lines = byte_vec.into_iter().filter(|x| x == &b'\n').count();
         Ok(n_lines)
     }
-    #[test]
-    fn closest_int_same_weight() {
-        let name = "closest_int_same_weight".into();
+    fn one_input_one_output_test_u64(name: &String, f: fn(u64) -> u64) {
         let mut rdr = load_records(&name).expect("csv file");
         let rows = rdr.records();
         let length = count_tests(&name).expect("an int");
         let bar = ProgressBar::new(length as u64);
         let mut stats = RuntimeStats::new("ns".into());
-        dbg!(&stats);
         bar.set_style(ProgressStyle::default_bar()
             .template("[{spinner}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
             .progress_chars("##-"));
@@ -93,7 +89,7 @@ mod tests {
             let _msg =rec.get(2).unwrap().parse::<String>().unwrap();
 
             let start = Instant::now();
-            let result = fxn::closest_int_same_weight(input);
+            let result = f(input);
             let runtime = start.elapsed().as_nanos();
             stats.update(runtime);
             bar.set_message(stats.get_msg());
@@ -108,6 +104,18 @@ mod tests {
         }
         bar.finish_with_message("tests passed!");
         println!("     {}", stats.msg);
+    }
+
+    #[test]
+    fn closest_int_same_weight_o1_time_space_complexity() {
+        let name = "closest_int_same_weight".into();
+        one_input_one_output_test_u64(&name, fxn::closest_int_same_weight);
+    }
+
+    #[test]
+    fn closest_int_same_weight() {
+        let name = "closest_int_same_weight".into();
+        one_input_one_output_test_u64(&name, fxn::closest_int_same_weight);
     }
 
     #[test]
