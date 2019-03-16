@@ -1,5 +1,7 @@
 mod fxn;
 
+
+
 #[cfg(test)]
 mod tests {
     use std::error::Error;
@@ -7,8 +9,43 @@ mod tests {
     use std::fs::File;
     use std::fs;
     use indicatif::{ProgressBar,ProgressStyle};
-    //use std::time::Instant;
+    use std::time::Instant;
     use std::time::SystemTime;
+    
+    #[derive(Debug)]
+    struct RuntimeStats {
+        unit: String,
+        runs: Vec<u128>,
+        avg: f64,
+        last: u128,
+        best: u128,
+        worst: u128,
+        msg: String,
+    }
+
+    impl RuntimeStats {
+        fn new(unit: String) -> RuntimeStats {
+            RuntimeStats { unit: unit, runs: Vec::new(), avg: 0f64, last: 0u128, best: 1_000_000_000_000u128, worst: 0u128, msg: "ns: 0".into()}
+        }
+        fn add(&mut self, runtime: u128) {
+            self.runs.push(runtime)
+        }
+        fn average(&mut self) {
+            let sum: u128  = self.runs.iter().sum();
+            self.avg = sum as f64 / self.runs.len() as f64
+        }
+        fn update(&mut self, runtime: u128) {
+            self.add(runtime);
+            self.last = runtime;
+            if runtime > self.worst { self.worst = runtime }
+            if runtime < self.best { self.best = runtime }
+            self.average();
+            self.msg = format!("|{}| {} | avg: {} | worst: {} | best: {} |", self.unit, self.last, self.avg, self.worst, self.best);
+        }
+        fn get_msg(&self) -> &str {
+            &(self.msg)[..]
+        }
+    }
 
     fn load_tests(fxn_name: String)  -> Result< Vec<(usize, usize, String)>, Box<Error> > {
         let test_tsv = File::open(format!("./tests/{}.tsv", fxn_name))?;
@@ -36,6 +73,41 @@ mod tests {
         let byte_vec = tsv_string.into_bytes();
         let n_lines = byte_vec.into_iter().filter(|x| x == &b'\n').count();
         Ok(n_lines)
+    }
+    #[test]
+    fn closest_int_same_weight() {
+        let name = "closest_int_same_weight".into();
+        let mut rdr = load_records(&name).expect("csv file");
+        let rows = rdr.records();
+        let length = count_tests(&name).expect("an int");
+        let bar = ProgressBar::new(length as u64);
+        let mut stats = RuntimeStats::new("ns".into());
+        dbg!(&stats);
+        bar.set_style(ProgressStyle::default_bar()
+            .template("[{spinner}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
+            .progress_chars("##-"));
+        for row in rows {
+            let rec = row.expect("another record");
+            let input = rec.get(0).unwrap().parse::<u64>().unwrap();
+            let output = rec.get(1).unwrap().parse::<u64>().unwrap();
+            let _msg =rec.get(2).unwrap().parse::<String>().unwrap();
+
+            let start = Instant::now();
+            let result = fxn::closest_int_same_weight(input);
+            let runtime = start.elapsed().as_nanos();
+            stats.update(runtime);
+            bar.set_message(stats.get_msg());
+
+            if result == output {
+                bar.inc(1);
+            } else {
+                bar.set_message(&format!("err: {} -> {}, should be {}", input, result, output) as &str);
+                println!("{}", stats.msg);
+                assert_eq!(result,output)
+            }
+        }
+        bar.finish_with_message("tests passed!");
+        println!("{}", stats.msg);
     }
 
     #[test]

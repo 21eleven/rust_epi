@@ -71,3 +71,14 @@ pub fn reverse(x: u16) -> u16 {
     }
     n
 }
+
+pub fn closest_int_same_weight(x: u64) -> u64 {
+    let mut n = x;
+    for i in 0..63 {
+        if (n >> i) & 1 != ((x >> (i + 1)) & 1) {
+            n = n ^ ((1 << i ) | (1 << i+1));
+            break;
+        }
+    }
+    n
+}
