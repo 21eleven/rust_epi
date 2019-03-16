@@ -40,7 +40,7 @@ mod tests {
             if runtime > self.worst { self.worst = runtime }
             if runtime < self.best { self.best = runtime }
             self.average();
-            self.msg = format!("|{}| {} | avg: {} | worst: {} | best: {} |", self.unit, self.last, self.avg, self.worst, self.best);
+            self.msg = format!("| {} | {:>7} | avg: {:>7.3} | worst: {:>7} | best: {:>7} |", self.unit, self.last, self.avg, self.worst, self.best);
         }
         fn get_msg(&self) -> &str {
             &(self.msg)[..]
@@ -101,13 +101,13 @@ mod tests {
             if result == output {
                 bar.inc(1);
             } else {
-                bar.set_message(&format!("err: {} -> {}, should be {}", input, result, output) as &str);
-                println!("{}", stats.msg);
+                //bar.set_message(&format!("err: {} -> {}, should be {}", input, result, output) as &str);
+                println!("err: {} -> {}, should be {}", input, result, output);
                 assert_eq!(result,output)
             }
         }
         bar.finish_with_message("tests passed!");
-        println!("{}", stats.msg);
+        println!("     {}", stats.msg);
     }
 
     #[test]
