@@ -21,14 +21,14 @@ pub fn parity(n: u64) -> u64 {
     parity
 }
 
-pub fn swap_bits(n: usize, idx1: u8, idx2: u8 ) -> usize {
+pub fn swap_bits(n: u64, idx1: u64, idx2: u64) -> u64 {
     /*
     swaps bits at two indicies on the a bit string if they differ
     */
     let mut swapped = n;
-    if (n >> idx1) != (n >> idx2) {
-        swapped = swapped ^ (1usize << idx1);
-        swapped = swapped ^ (&1usize << idx2);
+    if (n >> idx1 & 1) != (n >> idx2 & 1) {
+        swapped = swapped ^ (1u64 << idx1);
+        swapped = swapped ^ (&1u64 << idx2);
     }
     swapped
 }
