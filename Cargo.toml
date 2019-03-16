@@ -6,6 +6,4 @@ edition = "2018"
 
 [dependencies]
 csv =  "1"
-serde_derive = "^0.9"
-serde = "^0.9"
 indicatif = "*"
