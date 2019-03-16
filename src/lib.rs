@@ -73,6 +73,40 @@ mod tests {
         let n_lines = byte_vec.into_iter().filter(|x| x == &b'\n').count();
         Ok(n_lines)
     }
+    
+    fn one_input_one_output_test_u64_w_lookup(name: &String, f: fn(u64, &Vec<u16>) -> u64, lookup_fxn: fn() -> Vec<u16>) {
+        let mut rdr = load_records(&name).expect("csv file");
+        let rows = rdr.records();
+        let length = count_tests(&name).expect("an int");
+        let lookup = lookup_fxn();
+        let bar = ProgressBar::new(length as u64);
+        let mut stats = RuntimeStats::new("ns".into());
+        bar.set_style(ProgressStyle::default_bar()
+            .template("[{spinner}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
+            .progress_chars("##-"));
+        for row in rows {
+            let rec = row.expect("another record");
+            let input = rec.get(0).unwrap().parse::<u64>().unwrap();
+            let output = rec.get(1).unwrap().parse::<u64>().unwrap();
+            let _msg =rec.get(2).unwrap().parse::<String>().unwrap();
+
+            let start = Instant::now();
+            let result = f(input, &lookup);
+            let runtime = start.elapsed().as_nanos();
+            stats.update(runtime);
+            bar.set_message(stats.get_msg());
+
+            if result == output {
+                bar.inc(1);
+            } else {
+                println!("err: {} -> {}, should be {}", input, result, output);
+                assert_eq!(result,output)
+            }
+        }
+        bar.finish_with_message("tests passed!");
+        println!("     {}", stats.msg);
+    }
+
     fn one_input_one_output_test_u64(name: &String, f: fn(u64) -> u64) {
         let mut rdr = load_records(&name).expect("csv file");
         let rows = rdr.records();
@@ -94,10 +128,9 @@ mod tests {
             stats.update(runtime);
             bar.set_message(stats.get_msg());
 
-            if result == output {
+            if result == output.into() {
                 bar.inc(1);
             } else {
-                //bar.set_message(&format!("err: {} -> {}, should be {}", input, result, output) as &str);
                 println!("err: {} -> {}, should be {}", input, result, output);
                 assert_eq!(result,output)
             }
@@ -121,6 +154,8 @@ mod tests {
     #[test]
     fn reverse_bits() {
         let name = "reverse_bits".into();
+        one_input_one_output_test_u64_w_lookup(&name, fxn::reverse_bits, fxn::build_16bit_reverse_lookup);
+        /*
         let mut rdr = load_records(&name).expect("csv file");
         let rows = rdr.records();
         let length = count_tests(&name).expect("an int");
@@ -151,6 +186,7 @@ mod tests {
             }
         }
         bar.finish_with_message("tests passed!");
+        */
     }
 
     #[test]
@@ -162,6 +198,8 @@ mod tests {
     #[test]
     fn parity_lookup() {
         let name = "parity".into();
+        one_input_one_output_test_u64_w_lookup(&name, fxn::parity_lookup, fxn::build_16bit_parity_lookup);
+        /*
         let mut rdr = load_records(&name).expect("csv file");
         let rows = rdr.records();
         let length = count_tests(&name).expect("an int");
@@ -192,6 +230,7 @@ mod tests {
             }
         }
         bar.finish_with_message("tests passed!");
+        */
 
     }
 
@@ -227,6 +266,8 @@ mod tests {
     #[test]
     fn parity() {
         let name = "parity".into();
+        one_input_one_output_test_u64(&name, fxn::parity);
+        /*
         let rows = load_tests(name).unwrap();
         let length = rows.len();
         let mut iter_row = rows.into_iter();
@@ -244,6 +285,7 @@ mod tests {
                 None => {break},
             }
         }
+        */
     }
 
 }
