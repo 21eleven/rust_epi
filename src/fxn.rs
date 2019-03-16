@@ -61,10 +61,21 @@ pub fn build_16bit_reverse_lookup() -> Vec<u16> {
     (0..=0xFFFF).map(|i| reverse(i)).collect()
 }
 
+pub fn reverse_64(x: u64) -> u64 {
+    let mut n = x;
+    for i in 0..32 {
+        if (n >> (63 - i) & 1) != ( (n >> i) & 1) {
+            n = n ^ (1 << (63 - i));
+            n = n ^ (1 << i);
+        } 
+    }
+    n
+}
+
 pub fn reverse(x: u16) -> u16 {
     let mut n = x;
     for i in 0..8 {
-        if (n >> (15 - 0) & 1) != ( (n >> i) & 1) {
+        if (n >> (15 - i) & 1) != ( (n >> i) & 1) {
             n = n ^ (1 << (15 - i));
             n = n ^ (1 << i);
         } 

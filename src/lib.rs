@@ -154,6 +154,12 @@ mod tests {
     }
 
     #[test]
+    fn unoptimized_64bit_reversal() {
+        let name = "reverse_bits".into();
+        one_input_one_output_test_u64(&name, fxn::reverse_64);
+    }
+
+    #[test]
     fn parity_lookup() {
         let name = "parity".into();
         let mut rdr = load_records(&name).expect("csv file");
