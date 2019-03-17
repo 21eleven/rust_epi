@@ -1,4 +1,5 @@
 mod fxn;
+#[macro_use] extern crate  prettytable;
 
 #[cfg(test)]
 mod tests {
@@ -8,6 +9,7 @@ mod tests {
     use std::fs;
     use indicatif::{ProgressBar,ProgressStyle};
     use std::time::Instant;
+    //use prettytable::{Table, Row, Cell};
     
     #[derive(Debug)]
     struct RuntimeStats {
@@ -41,6 +43,13 @@ mod tests {
         }
         fn get_msg(&self) -> &str {
             &(self.msg)[..]
+        }
+        fn print_results_table(&self) {
+            let results = table!(
+                ["Tests Passed", "Average Runtime", "Worst Runtime", "Best Runtime"],
+                [bFGc->"✓", bFcc->format!("{:.3} {}", self.avg, self.unit), bFrc->format!("{} {}", self.worst, self.unit), bFmc->format!("{} {}", self.best, self.unit)]
+            );
+            results.printstd();
         }
     }
 
@@ -87,7 +96,7 @@ mod tests {
             }
         }
         bar.finish_with_message("tests passed!");
-        println!("     {}", stats.msg);
+        stats.print_results_table();
     }
     fn three_input_one_output_test_u64(name: &String, f: fn(u64, u64, u64) -> u64) {
         let mut rdr = load_records(&name).expect("csv file");
@@ -152,7 +161,7 @@ mod tests {
             }
         }
         bar.finish_with_message("tests passed!");
-        println!("     {}", stats.msg);
+        stats.print_results_table();
     }
 
     #[test]
