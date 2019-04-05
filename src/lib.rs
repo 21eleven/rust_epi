@@ -131,6 +131,39 @@ mod tests {
         bar.finish_with_message("tests passed!");
         println!("     {}", stats.msg);
     }
+    fn two_input_one_output_test_u64(name: &String, f: fn(u64, u64) -> u64) {
+        let mut rdr = load_records(&name).expect("csv file");
+        let rows = rdr.records();
+        let length = count_tests(&name).expect("an int");
+        let bar = ProgressBar::new(length as u64);
+        let mut stats = RuntimeStats::new("ns".into());
+        bar.set_style(ProgressStyle::default_bar()
+            .template("[{spinner}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
+            .progress_chars("##-"));
+        for row in rows {
+            let rec = row.expect("another record");
+            dbg!(&rec);
+            let input_one = rec.get(0).unwrap().parse::<u64>().unwrap();
+            let input_two = rec.get(1).unwrap().parse::<u64>().unwrap();
+            let output = rec.get(2).unwrap().parse::<u64>().unwrap();
+            let _msg =rec.get(3).unwrap().parse::<String>().unwrap();
+
+            let start = Instant::now();
+            let result = f(input_one, input_two);
+            let runtime = start.elapsed().as_nanos();
+            stats.update(runtime);
+            bar.set_message(stats.get_msg());
+
+            if result == output.into() {
+                bar.inc(1);
+            } else {
+                println!("err: {}, {} -> {}, should be {}", input_one, input_two, result, output);
+                assert_eq!(result,output)
+            }
+        }
+        bar.finish_with_message("tests passed!");
+        stats.print_results_table();
+    }
 
     fn one_input_one_output_test_u64(name: &String, f: fn(u64) -> u64) {
         let mut rdr = load_records(&name).expect("csv file");
@@ -162,6 +195,13 @@ mod tests {
         }
         bar.finish_with_message("tests passed!");
         stats.print_results_table();
+    }
+
+    #[test]
+    fn primitive_multiply() {
+        let name = "primitive_multiply".into();
+        two_input_one_output_test_u64(&name, fxn::multiply);
+        
     }
 
     #[test]

@@ -93,3 +93,39 @@ pub fn closest_int_same_weight(x: u64) -> u64 {
     }
     n
 }
+
+pub fn multiply(i: u64, j: u64) -> u64 {
+    fn add(a: u64, b: u64) -> u64 {
+        let mut running_sum = 0;
+        let mut carryin = 0;
+        let mut k = 1;
+        let mut temp_a = a;
+        let mut temp_b = b;
+        
+        while temp_a > 0 || temp_b > 0 {
+            let ak = a & k;
+            let bk = b & k;
+            let carryout = (ak & bk) | (ak & carryin) | (bk & carryin);
+            running_sum |= ak ^ bk ^ carryin;
+            carryin = carryout << 1;
+            k <<= 1;
+            temp_a >>= 1;
+            temp_b >>= 1;
+        }
+
+        running_sum | carryin
+    }
+
+    let mut x = i;
+    let mut y = j;
+    let mut running_sum = 0;
+    while x > 0 {
+        if x & 1 == 1 {
+            running_sum = add(running_sum, y)
+        }
+        x >>= 1;
+        y <<= 1;
+    }
+
+    running_sum    
+}
