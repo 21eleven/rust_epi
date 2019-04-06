@@ -9,7 +9,6 @@ mod tests {
     use std::fs;
     use indicatif::{ProgressBar,ProgressStyle};
     use std::time::Instant;
-    //use prettytable::{Table, Row, Cell};
     
     #[derive(Debug)]
     struct RuntimeStats {
@@ -142,7 +141,6 @@ mod tests {
             .progress_chars("##-"));
         for row in rows {
             let rec = row.expect("another record");
-            dbg!(&rec);
             let input_one = rec.get(0).unwrap().parse::<u64>().unwrap();
             let input_two = rec.get(1).unwrap().parse::<u64>().unwrap();
             let output = rec.get(2).unwrap().parse::<u64>().unwrap();
