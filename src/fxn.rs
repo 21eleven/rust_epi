@@ -129,3 +129,21 @@ pub fn multiply(i: u64, j: u64) -> u64 {
 
     running_sum    
 }
+
+pub fn divide(a: u64, b: u64) -> u64 {
+    let mut x = a;
+    let y = b;
+    let mut result = 0;
+    let mut power = 32;
+
+    let mut y_power = y << power;
+    while x >= y {
+        while y_power > x {
+            y_power >>= 1;
+            power -= 1;
+        }
+        result += 1 << power;
+        x -= y_power;
+    }
+    result
+}

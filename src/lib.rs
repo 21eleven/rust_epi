@@ -196,6 +196,11 @@ mod tests {
         bar.finish_with_message("tests passed!");
         stats.print_results_table();
     }
+    #[test]
+    fn primitive_divide() {
+        let name = "primitive_divide".into();
+        two_input_one_output_test_u64(&name, fxn::divide);
+    }
 
     #[test]
     fn primitive_multiply() {
