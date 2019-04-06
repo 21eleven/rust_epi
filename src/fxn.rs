@@ -147,3 +147,21 @@ pub fn divide(a: u64, b: u64) -> u64 {
     }
     result
 }
+
+pub fn power_x_y(a: f64, b: i64) -> f64 {
+    let mut x = a;
+    let mut result: f64 = 1.0;
+    let mut power = b;
+    if b < 0 {
+        power = -1 * power;
+        x = 1.0 / x;
+    }
+    while power != 0 {
+        if power & 1 == 1 {
+            result *= x as f64;
+        }
+        x *= x;
+        power >>= 1;
+    }
+    result
+}
