@@ -195,6 +195,38 @@ mod tests {
         stats.print_results_table();
     }
 
+    fn one_input_one_output_test_i64(name: &String, f: fn(i64) -> i64) {
+        let mut rdr = load_records(&name).expect("csv file");
+        let rows = rdr.records();
+        let length = count_tests(&name).expect("an int");
+        let bar = ProgressBar::new(length as u64);
+        let mut stats = RuntimeStats::new("ns".into());
+        bar.set_style(ProgressStyle::default_bar()
+            .template("[{spinner}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
+            .progress_chars("##-"));
+        for row in rows {
+            let rec = row.expect("another record");
+            let input = rec.get(0).unwrap().parse::<i64>().unwrap();
+            let output = rec.get(1).unwrap().parse::<i64>().unwrap();
+            let _msg =rec.get(2).unwrap().parse::<String>().unwrap();
+
+            let start = Instant::now();
+            let result = f(input);
+            let runtime = start.elapsed().as_nanos();
+            stats.update(runtime);
+            bar.set_message(stats.get_msg());
+
+            if result == output.into() {
+                bar.inc(1);
+            } else {
+                println!("err: {} -> {}, should be {}", input, result, output);
+                assert_eq!(result,output)
+            }
+        }
+        bar.finish_with_message("tests passed!");
+        stats.print_results_table();
+    }
+
     fn one_input_one_output_test_u64(name: &String, f: fn(u64) -> u64) {
         let mut rdr = load_records(&name).expect("csv file");
         let rows = rdr.records();
@@ -225,6 +257,12 @@ mod tests {
         }
         bar.finish_with_message("tests passed!");
         stats.print_results_table();
+    }
+
+    #[test]
+    fn reverse_digits() {
+        let name = "reverse_digits".into();
+        one_input_one_output_test_i64(&name, fxn::reverse_digits);
     }
     #[test]
     fn power_x_y() {

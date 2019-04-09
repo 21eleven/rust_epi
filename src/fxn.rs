@@ -165,3 +165,17 @@ pub fn power_x_y(a: f64, b: i64) -> f64 {
     }
     result
 }
+
+pub fn reverse_digits(n: i64) -> i64 {
+    let mut x = n.abs();
+    let mut result = 0;
+    while x > 0 {
+        result = result * 10 + x % 10;
+        x /= 10;
+    }
+    if n < 0 {
+        -result
+    } else {
+        result
+    }
+}
