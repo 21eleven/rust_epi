@@ -179,3 +179,23 @@ pub fn reverse_digits(n: i64) -> i64 {
         result
     }
 }
+
+pub fn palindrome(n: i64) -> bool {
+    if n < 0 {
+        false
+    } else {
+        let x = n as f64;
+        let digits = x.log10().floor() + 1.0;
+        if digits == 1.0 {
+            return true
+        }
+        for i in 1..((digits/2.0).floor() as u32) {
+            let lower =  n % (10 as i64).pow(i);
+            let upper = n / (10 as i64).pow((digits as u32) - i);
+            if lower != upper {
+                return false
+            }
+        }
+        true
+    }
+}
