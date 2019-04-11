@@ -179,22 +179,24 @@ pub fn reverse_digits(n: i64) -> i64 {
         result
     }
 }
-
 pub fn palindrome(n: i64) -> bool {
     if n < 0 {
         false
     } else {
-        let x = n as f64;
-        let digits = x.log10().floor() + 1.0;
-        if digits == 1.0 {
-            return true
-        }
-        for i in 1..((digits/2.0).floor() as u32) {
-            let lower =  n % (10 as i64).pow(i);
-            let upper = n / (10 as i64).pow((digits as u32) - i);
-            if lower != upper {
+        if n == 0 { return true }
+        let mut x = n;
+        let digits = ((x as f64).log10().floor() + 1.0) as i64;
+        if digits == 1 { return true }
+        dbg!(n);
+        dbg!(digits);
+        let mut msd_mask = 10i64.pow((digits - 1) as u32);
+        for _ in 0..(digits /2) as u32 {
+            if x / msd_mask != x % 10 {
                 return false
             }
+            x %= msd_mask;
+            x /= 10;
+            msd_mask /= 100;
         }
         true
     }
